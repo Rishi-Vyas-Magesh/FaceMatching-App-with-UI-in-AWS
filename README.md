@@ -34,7 +34,7 @@ Step-8: I created neccessary role and attached EC2,Rekognition.S3 full access to
 
 
 
-Step-9: I connected to the EC2 via my CLI and Instance Key---- I created my "app.py" code to use my work on the backend to do the FaceMatching LIKE i SAID and basic HTML code for a UI.-----I launched it in the IPV4 address of my code--- the UI opens.
+Step-9: I connected to the EC2 via my CLI and Instance Key by SSH ing into it, created directories for app and html code---- I created my "app.py" code to use my work on the backend to do the FaceMatching LIKE i SAID and basic HTML code for a UI.-----I launched it in the IPV4 address of my code--- the UI opens.
 
 
 Step-10: I can upload any image of a person part of my database/collection of Images and it will immediately identify and flag them!!! and In my testing It works.
