@@ -1,0 +1,157 @@
+import boto3
+import re
+
+# Initialize AWS clients
+rekognition = boto3.client('rekognition')
+s3 = boto3.client('s3')
+
+# Fixed project values
+bucket_name = 'aws-ml-proj-bucket'
+collection_id = 'FaceCollection'
+
+# Function to sanitize ExternalImageId to match AWS naming rules
+def sanitize_external_id(name):
+    return re.sub(r'[^a-zA-Z0-9_.\-:]', '_', name)
+
+# Go through every object in the bucket
+paginator = s3.get_paginator('list_objects_v2')
+pages = paginator.paginate(Bucket=bucket_name)
+
+print(f"\n🔍 Scanning S3 bucket: {bucket_name}...\n")
+
+for page in pages:
+    if 'Contents' in page:
+        for obj in page['Contents']:
+            file_key = obj['Key']
+
+            # Only process image files
+            if file_key.lower().endswith(('.jpg', '.jpeg', '.png')):
+
+                # Get folder name as class label
+                path_parts = file_key.split('/')
+                if len(path_parts) >= 2:
+                    folder_name = path_parts[0]
+                else:
+                    print(f"⚠️ Skipping file (not inside a folder): {file_key}")
+                    continue
+
+                # Sanitize folder name
+                external_image_id = sanitize_external_id(folder_name)
+
+                print(f"📂 Indexing: {file_key} ➜ ExternalImageId: '{external_image_id}'")
+
+                try:
+                    response = rekognition.index_faces(
+                        CollectionId=collection_id,
+                        Image={
+                            'S3Object': {
+                                'Bucket': bucket_name,
+                                'Name': file_key
+                            }
+                        },
+                        ExternalImageId=external_image_id,
+                        DetectionAttributes=['ALL']
+                    )
+                    print(f"✅ Indexed successfully: {file_key}\n")
+
+                except Exception as e:
+                    print(f"❌ Error indexing {file_key}: {e}\n")
+
+
+Code to list_faces.py
+
+import boto3
+
+# AWS Rekognition client
+rekognition = boto3.client('rekognition')
+
+collection_id = 'FaceCollection'
+
+print(f"\n📂 Listing all faces in collection: {collection_id}\n")
+
+response = rekognition.list_faces(CollectionId=collection_id)
+
+faces = response['Faces']
+
+if not faces:
+    print("❌ No faces found in the collection.")
+else:
+    for face in faces:
+        print(f"🧑 FaceId: {face['FaceId']}")
+        print(f"🔖 ExternalImageId: {face['ExternalImageId']}")
+        print(f"🖼️ ImageId: {face['ImageId']}")
+        print('-' * 40)
+
+# Handle pagination if there are many faces
+while 'NextToken' in response:
+    response = rekognition.list_faces(
+        CollectionId=collection_id,
+        NextToken=response['NextToken']
+    )
+    for face in response['Faces']:
+        print(f"🧑 FaceId: {face['FaceId']}")
+        print(f"🔖 ExternalImageId: {face['ExternalImageId']}")
+        print(f"🖼️ ImageId: {face['ImageId']}")
+        print('-' * 40)
+
+Code to search_faces:
+
+import boto3
+
+# ✅ Initialize Rekognition client
+rekognition = boto3.client('rekognition')
+
+# ✅ Specify the face collection you've already created
+collection_id = 'FaceCollection'
+
+# ✅ Ask the user for the test image file name
+local_image_path = input("🖼️ Enter the test image filename: ").strip()
+
+try:
+    # ✅ Open and read the image file as bytes
+    with open(local_image_path, 'rb') as image_file:
+        image_bytes = image_file.read()
+
+    # ✅ Call Rekognition to search for the face
+    response = rekognition.search_faces_by_image(
+        CollectionId=collection_id,
+        Image={'Bytes': image_bytes},
+        MaxFaces=1,  # Top match
+        FaceMatchThreshold=90
+    )
+
+    matches = response.get('FaceMatches', [])
+
+    if matches:
+        print("\n✅ Match found!")
+        for match in matches:
+            print(f"Matched Face ID      : {match['Face']['FaceId']}")
+            print(f"Matched Person (Name): {match['Face']['ExternalImageId']}")
+            print(f"Confidence Score     : {match['Similarity']:.2f}%")
+    else:
+        print("\n❌ No match found. Try another image or lower the threshold.")
+
+except FileNotFoundError:
+    print(f"\n⚠️ File '{local_image_path}' not found in CloudShell. Upload the image and try again.")
+except Exception as e:
+    print(f"\n❌ Error occurred: {e}")
+
+
+
+##Code used for backing up the .py files and test images in S3 bucket of mychoice
+aws s3 cp index_faces.py s3://backups-bucketies/code/
+aws s3 cp search_faces.py s3://backups-bucketies/code/
+aws s3 cp list_faces.py s3://backups-bucketies/code/
+
+aws s3 cp test1.jpeg s3://backups-bucketies/test_images/
+
+For any uploadedimage in cloudshell image back-up:
+aws s3 cp <image_name> s3://aws-ml-proj-bucket/test_images/
+
+###Code used for index_new_folder_faces backup in S3 bucket of my choice
+aws s3 cp index_new_folder_faces.py s3://backups-bucketies/code/
+
+
+aws s3 cp indexed_folders.txt s3://backups-bucketies/text_files/
+
+

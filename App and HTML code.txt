@@ -1,0 +1,103 @@
+##Code for "App.py":
+
+from flask import Flask, request, render_template
+import boto3
+import os
+from werkzeug.utils import secure_filename
+
+app = Flask(__name__)
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+rekognition = boto3.client('rekognition', region_name='us-east-1')
+collection_id = 'FaceCollection'
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'image' not in request.files:
+        return 'No file part'
+
+    file = request.files['image']
+    if file.filename == '':
+        return 'No selected file'
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
+
+    with open(filepath, 'rb') as image:
+        response = rekognition.search_faces_by_image(
+            CollectionId=collection_id,
+            Image={'Bytes': image.read()},
+            MaxFaces=1,
+            FaceMatchThreshold=90
+        )
+
+    matches = response.get('FaceMatches', [])
+    if matches:
+        face_id = matches[0]['Face']['FaceId']
+        external_image_id = matches[0]['Face']['ExternalImageId']
+        similarity = matches[0]['Similarity']
+        return f'''
+            <h3>✅ Match found!</h3>
+            <p><strong>Matched Face ID:</strong> {face_id}</p>
+            <p><strong>Name:</strong> {external_image_id}</p>
+            <p><strong>Similarity:</strong> {similarity:.2f}%</p>
+            <a href="/">Try another</a>
+        '''
+    else:
+        return '<h3>❌ No Face Match found in our Library</h3><a href="/">Try another</a>'
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+
+
+
+
+
+
+
+
+
+##Code for "UI interface"
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Match UI</title>
+</head>
+<body>
+    <h2>Upload a Face Image</h2>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required><br><br>
+        <input type="submit" value="Upload & Search">
+    </form>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
