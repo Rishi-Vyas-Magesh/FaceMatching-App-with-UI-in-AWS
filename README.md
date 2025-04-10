@@ -30,7 +30,8 @@ Step:6 I created the "list_faces" code to check if all folders and images were i
 Step-7: I wanted to make it with a basic UI and application code. Hence, I launched an EC2 instance, with keys and security groups--Specific Inbound rules! to allow access from any IP address on port 5000.
 
 
-Step-8: I created neccessary role and attached EC2,Rekognition.S3 full access to it and made the instance assume that role.
+Step-8: I created neccessary role and attached EC2,Rekognition.S3 full access to it and made the instance assume that role.It give permisions to access (S3,EC2,Rekognition).
+
 
 
 Step-9: I connected to the EC2 via my CLI and Instance Key---- I created my "app.py" code to use my work on the backend to do the FaceMatching LIKE i SAID and basic HTML code for a UI.-----I launched it in the IPV4 address of my code--- the UI opens.
