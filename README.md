@@ -1,6 +1,8 @@
 # FaceMatching-App-with-UI-in-AWS
 
-This is a fascinating project in which I have used my knowledge and Intrest in "Computer Vision" to come-up with a Limited Face recognition App which runs on an EC2 instance launced in AWS. Let me Explain with Brief Steps:
+This is a fascinating project in which I have used my knowledge and Intrest in "Computer Vision" to come-up with a Limited Face recognition App which runs on an EC2 instance launced in AWS. I had no prior experience in app coding ir UI(html) but with the advent of AI, it only makes sense to use tools available around us to make our lives better.
+
+Let me Explain with Brief Steps:
 
 Step-1: I created an AWS free tier account where i have 1 year free access to use services.
 
@@ -36,9 +38,7 @@ Step-9: I connected to the EC2 via my CLI and Instance Key---- I created my "app
 
 Step-10: I can upload any image of a person part of my database/collection of Images and it will immediately identify and flag them!!! and In my testing It works.
 
-
-
-(The codes and access and proof will be uploaded soon)
+I have attached the codes I mentioned above. And a video demo of implementation FYI.
 (The PPT with a business implication for such a model will also be uploaded soon)
 
 
