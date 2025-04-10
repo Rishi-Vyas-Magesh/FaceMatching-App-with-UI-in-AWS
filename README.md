@@ -40,6 +40,6 @@ Step-9: I connected to the EC2 via my CLI and Instance Key by SSH ing into it, c
 Step-10: I can upload any image of a person part of my database/collection of Images and it will immediately identify and flag them!!! and In my testing It works.
 
 I have attached the codes I mentioned above. And a video demo of implementation FYI.
-(The PPT with a business implication for such a model will also be uploaded soon)
+(The PPT with a business implication for such a model is also uploaded)
 
 
